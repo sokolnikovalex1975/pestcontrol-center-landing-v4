@@ -398,7 +398,7 @@
         gsap.fromTo(card, { opacity: 0, y: 60, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 1.3, ease: 'expo.out', delay: d });
         gsap.fromTo($('.pest-img img', card), { scale: 1.45, filter: 'grayscale(1) brightness(.6)' }, { scale: 1, filter: 'grayscale(0) brightness(1)', duration: 1.6, ease: 'expo.out', delay: d + 0.1, clearProps: 'filter' });
         var b = $('.bar-f', card);
-        gsap.fromTo(b, { width: '0%' }, { width: b.dataset.w + '%', duration: 1.8, ease: 'expo.out', delay: d + 0.35 });
+        if (b) gsap.fromTo(b, { width: '0%' }, { width: b.dataset.w + '%', duration: 1.8, ease: 'expo.out', delay: d + 0.35 });
         setTimeout(function () { card.classList.add('scanned'); }, (d + 0.3) * 1000);
       }, 'top 88%');
     });

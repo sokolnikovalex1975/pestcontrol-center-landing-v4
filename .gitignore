@@ -2,3 +2,6 @@
 vendor/autoload.php
 vendor/composer/
 vendor/phpmailer/
+
+__pycache__/
+*.pyc
