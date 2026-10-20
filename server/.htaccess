@@ -1,0 +1,13 @@
+# ПЕСТКОНТРОЛЬ Центр — правила сервера.
+# Перенаправление на HTTPS включено в панели Timeweb.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Единый адрес сайта: www.пестконтроль-центр.рф -> пестконтроль-центр.рф
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+  # Служебные файлы почтовой библиотеки не открываются из браузера
+  RewriteRule ^vendor/(composer|phpmailer)(/|$) - [F,L]
+  RewriteRule ^vendor/autoload\.php$ - [F,L]
+</IfModule>

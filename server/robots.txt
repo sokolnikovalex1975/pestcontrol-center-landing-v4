@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /send.php
+Disallow: /vendor/composer/
+Disallow: /vendor/phpmailer/
+
+Sitemap: https://xn----itbbsflddbfpfdodg9d0f.xn--p1ai/sitemap.xml
