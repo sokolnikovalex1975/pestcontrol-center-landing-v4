@@ -8,8 +8,9 @@ from typo import typo
 OUT = os.path.join(os.path.dirname(__file__), '..', '..')
 CSSV = '20261020e'
 SITE = 'пестконтроль-центр.рф'
-MAIL_HREF = 'mailto:info@xn----itbbsflddbfpfdodg9d0f.xn--p1ai'
-MAIL = f'<a class="u" href="{MAIL_HREF}">info@{SITE}</a>'
+MAIL_TEXT = 'b2b@pestcontrol-center.ru'
+MAIL_HREF = f'mailto:{MAIL_TEXT}'
+MAIL = f'<a class="u" href="{MAIL_HREF}">{MAIL_TEXT}</a>'
 PHONE = '<a class="u" href="tel:+74950851095">+7 (495) 085-10-95</a>'
 POLICY_URL = f'<a class="u" href="../privacy/">https://{SITE}/privacy/</a>'
 CONSENT_URL = f'<a class="u" href="../soglasie/">https://{SITE}/soglasie/</a>'
@@ -78,7 +79,7 @@ def page(slug, title, description, body_html):
   <div class="wrap">
     <span>© 2026 ПЕСТКОНТРОЛЬ Центр</span>
     <nav aria-label="Документы">{nav_html}</nav>
-    <span><a href="tel:+74950851095">+7 (495) 085-10-95</a> · <a href="{MAIL_HREF}">info@{SITE}</a></span>
+    <span><a href="tel:+74950851095">+7 (495) 085-10-95</a> · <a href="{MAIL_HREF}">{MAIL_TEXT}</a></span>
   </div>
   <div class="wrap l-op" id="operator"><p>{OPERATOR_NOTE}</p></div>
 </footer>
