@@ -80,6 +80,8 @@ $smtpPort = 465;
 $fromEmail = 'info@xn----itbbsflddbfpfdodg9d0f.xn--p1ai';
 $fromName = 'Заявка на аудит объекта';
 $toEmail = 'АДРЕС_ДЛЯ_ЗАЯВОК@example.ru'; // настоящий адрес указан только на сервере
+// Рабочая почта для заявок (указана на сайте). Письмо уходит на оба адреса.
+$toEmailB2b = 'b2b@pestcontrol-center.ru';
 
 // Чтение и ограничение длины полей.
 function field(string $key, int $maxLength = 2000): string
@@ -201,6 +203,7 @@ $mail->Debugoutput = static function ($str, $level) {
 
     $mail->setFrom($fromEmail, $fromName);
     $mail->addAddress($toEmail);
+    $mail->addAddress($toEmailB2b);
 
     // Ответ на заявку можно отправить посетителю.
     if ($email !== '') {
