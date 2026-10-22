@@ -1,10 +1,11 @@
-# ПЕСТКОНТРОЛЬ Центр — лендинг, редакция v4 (на проверке)
+# ПЕСТКОНТРОЛЬ Центр — лендинг, редакция v4
 
 Новая редакция главной страницы [пестконтроль-центр.рф](https://xn----itbbsflddbfpfdodg9d0f.xn--p1ai/): постоянный пест-контроль для бизнеса в Москве и Московской области. Дизайн прежний; тексты, порядок блоков и метаданные переработаны, чтобы страница не повторяла агерис.рф/audit.
 
 - Предпросмотр: [sokolnikovalex1975.github.io/pestcontrol-center-landing-v4](https://sokolnikovalex1975.github.io/pestcontrol-center-landing-v4/)
 - Список правок и вопросы на подтверждение: [CHANGES.md](CHANGES.md)
-- Опубликованная версия до правок: репозиторий [pestcontrol-center-landing](https://github.com/sokolnikovalex1975/pestcontrol-center-landing)
+- **Опубликовано на пестконтроль-центр.рф 22.10.2026** из ветки `main` (коммит с этой записью). Копия сайта до публикации: `/backups/public_html_backup_2026-10-22_before-v4.zip` на хостинге, вне публичного каталога.
+- Прежняя опубликованная версия (до v4): репозиторий [pestcontrol-center-landing](https://github.com/sokolnikovalex1975/pestcontrol-center-landing)
 
 ## Ветки
 
