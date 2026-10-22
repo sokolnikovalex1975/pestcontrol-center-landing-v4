@@ -147,7 +147,7 @@
   /* отправка заявки: один запрос к send.php, цели — только после ответа сервера */
   /* превью на GitHub Pages: заявки никуда не отправляются, форма показывает успешную отправку */
   var DEMO = /\.github\.io$/i.test(location.hostname);
-  var sending = false, FAIL_MSG = 'Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам: +7 (495) 085-10-95.';
+  var sending = false, FAIL_MSG = 'Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам: +7 (495) 104-35-70.';
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (sending) return;
