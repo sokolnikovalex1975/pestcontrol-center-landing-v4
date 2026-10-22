@@ -8,7 +8,7 @@ def _typo_text(s):
     s = s.replace('№ ', '№' + NB)
     s = re.sub(r'(?<![\w])(ООО|АО|ИП) (?=«)', lambda m: m.group(1) + NB, s)
     s = re.sub(r'(?<=\d) (?=[а-яёА-ЯЁ])', NB, s)
-    s = s.replace('+7 (495) 085-10-95', '+7' + NB + '(495)' + NB + '085-10-95')
+    s = s.replace('+7 (495) 104-35-70', '+7' + NB + '(495)' + NB + '104-35-70')
     return s
 def typo(html):
     parts = re.split(r'(<[^>]+>)', html)
