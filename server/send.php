@@ -174,7 +174,7 @@ $escape = static function (string $value): string {
 };
 
 // Фиксируем факт согласия на обработку персональных данных (доказательство для оператора, ч. 3 ст. 9 152-ФЗ).
-$consentVersion = '20.10.2026';
+$consentVersion = '22.10.2026';
 $consentAt = (new DateTimeImmutable('now', new DateTimeZone('Europe/Moscow')))->format('d.m.Y H:i:s');
 $clientIp = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
 $consentNote = 'Согласие на обработку персональных данных дано нажатием кнопки «Отправить заявку» '
