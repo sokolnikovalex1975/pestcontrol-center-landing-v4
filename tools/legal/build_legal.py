@@ -6,7 +6,7 @@ from typo import typo
 
 # Страницы собираются в корень репозитория: privacy/index.html и soglasie/index.html
 OUT = os.path.join(os.path.dirname(__file__), '..', '..')
-CSSV = '20261020e'
+CSSV = '20261027p'
 SITE = 'пестконтроль-центр.рф'
 MAIL_TEXT = 'b2b@pestcontrol-center.ru'
 MAIL_HREF = f'mailto:{MAIL_TEXT}'
@@ -58,7 +58,7 @@ def page(slug, title, description, body_html):
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="{FAVICON}">
-<link rel="preload" href="../fonts/inter-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/inter-ru-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../legal.css?v={CSSV}">
 </head>
 <body>
@@ -66,7 +66,7 @@ def page(slug, title, description, body_html):
   <div class="wrap">
     <a href="../" class="logo" aria-label="ПЕСТКОНТРОЛЬ Центр — на главную">
       <span class="logo-mark">{LOGO_SVG}</span>
-      <span><span class="logo-name">ПЕСТКОНТРОЛЬ</span><span class="logo-sub">Центр</span></span>
+      <span class="logo-txt"><span class="logo-name">ПЕСТКОНТРОЛЬ</span> <span class="logo-sub">Центр</span></span>
     </a>
     <a href="../" class="l-back" aria-label="Вернуться на главную страницу"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4"/></svg><span class="t-short">На главную</span></a>
   </div>

@@ -195,11 +195,31 @@
       });
   });
 
+  /* ---------- фоновые картинки блоков: грузим при подходе к блоку ---------- */
+  var lazyBgs = $$('.pests-bg,.cta-bg');
+  if ('IntersectionObserver' in window) {
+    var bgIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('bg-in'); bgIO.unobserve(e.target); } });
+    }, { rootMargin: '150% 0px' });
+    lazyBgs.forEach(function (b) { bgIO.observe(b); });
+  } else lazyBgs.forEach(function (b) { b.classList.add('bg-in'); });
+
+  /* ---------- бесконечные CSS-анимации блоков вне экрана — на паузу ---------- */
+  if ('IntersectionObserver' in window) {
+    var offIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { e.target.classList.toggle('anim-off', !e.isIntersecting); });
+    });
+    ['#hero', '#zadachi', '#podhod'].forEach(function (id) { var el = $(id); if (el) offIO.observe(el); });
+  }
+
   if (!anim) return; /* дальше — только анимации */
 
   /* ================================================================ */
   var desk = matchMedia('(min-width: 1025px)').matches;
   var mobile = matchMedia('(max-width: 760px)').matches;
+  /* размытие (blur) при появлении — только на компьютерах с мышью: на телефонах и планшетах оно сильно грузит процессор */
+  var richFx = fine && !mobile;
+  var fx = function (o, px) { if (richFx) o.filter = 'blur(' + px + 'px)'; return o; };
 
   /* ---------- разбивка текста на слова ---------- */
   function splitWords(el, plain) {
@@ -223,6 +243,19 @@
     };
     walk(el);
   }
+
+  /* ---------- отложенная инициализация ----------
+     Анимации блоков ниже первого экрана настраиваются отдельными короткими задачами после первого экрана:
+     так основной поток не блокируется одной длинной задачей и заставка идёт плавно.
+     Пока идёт заставка, прокрутка остановлена, а блоки до настройки скрыты стилями (style.css). */
+  var later = [];
+  var defer = function (fn) { later.push(fn); };
+  var runLater = function () {
+    var fn = later.shift();
+    if (!fn) return;
+    fn();
+    if (later.length) setTimeout(runLater, 0);
+  };
 
   /* ---------- курсор ---------- */
   if (fine) {
@@ -280,7 +313,7 @@
 
   /* ---------- первый экран: «фонарь» инспектора, параллакс, наклон панели ---------- */
   var hero = $('#hero'), media = $('#heroMedia'), lit = $('#heroLit'), panel = $('#panel');
-  var sx = 0.7, sy = 0.42, tx = 0.7, ty = 0.42, lastMove = -1e9, heroVisible = true;
+  var sx = 0.7, sy = 0.42, tx = 0.7, ty = 0.42, lastMove = -1e9, heroVisible = true, litOn = false;
   lit.style.setProperty('--sr', mobile ? '190px' : 'clamp(240px, 21vw, 400px)');
   new IntersectionObserver(function (en) { heroVisible = en[0].isIntersecting; }).observe(hero);
   hero.addEventListener('pointermove', function (e) {
@@ -288,14 +321,18 @@
     var r = media.getBoundingClientRect();
     tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height; lastMove = performance.now();
   });
+  var litT = 0;
   gsap.ticker.add(function () {
-    if (!heroVisible) return;
-    var now = performance.now();
+    if (!heroVisible || !litOn) return; /* до входа первого экрана фонарь скрыт под заставкой — не считаем */
+    var now = performance.now(), dt = now - litT;
+    if (!fine && dt < 30) return; /* на сенсорных экранах фонарь движется сам и медленно — 30 обновлений в секунду хватает, нагрузка вдвое ниже */
+    litT = now;
     if (now - lastMove > 2600) {
       var t = now / 1000;
       tx = 0.66 + 0.2 * Math.sin(t * 0.33); ty = 0.46 + 0.17 * Math.sin(t * 0.47 + 1.3);
     }
-    sx += (tx - sx) * 0.06; sy += (ty - sy) * 0.06;
+    var k = 1 - Math.pow(0.94, Math.min(dt, 100) / 16.67);
+    sx += (tx - sx) * k; sy += (ty - sy) * k;
     lit.style.setProperty('--sx', (sx * 100).toFixed(2) + '%');
     lit.style.setProperty('--sy', (sy * 100).toFixed(2) + '%');
   });
@@ -320,16 +357,17 @@
   var heroLines = $$('.hero h1 .ln>span');
   gsap.set(heroLines, { y: 0, yPercent: 110, rotation: 3 });
   function heroIn() {
+    litOn = true;
     var tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
     tl.fromTo('.hero-bg,.hero-lit', { scale: 1.18 }, { scale: 1, duration: 2.6 }, 0)
       .to(lit, { opacity: 1, duration: 2 }, 0.4)
-      .fromTo('.badge', { opacity: 0, y: 20, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.1 }, 0.15)
-      .to(heroLines, { yPercent: 0, rotation: 0, duration: 1.4, stagger: 0.11 }, 0.25)
-      .fromTo('.lead', { opacity: 0, y: 24, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2 }, 0.65)
-      .fromTo('.hero-ctas', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 1.1 }, 0.8)
-      .fromTo(panel, { opacity: 0, x: 70, rotationY: -14, filter: 'blur(10px)' }, { opacity: 1, x: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.6 }, 0.5)
-      .fromTo('.panel li', { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.9, stagger: 0.08 }, 0.9)
-      .fromTo('.scroll-cue', { opacity: 0 }, { opacity: 1, duration: 1 }, 1.4);
+      .fromTo('.badge', fx({ opacity: 0, y: 20 }, 8), fx({ opacity: 1, y: 0, duration: 1.1 }, 0), 0.1)
+      .to(heroLines, { yPercent: 0, rotation: 0, duration: 1.4, stagger: 0.11 }, 0.15)
+      .fromTo('.lead', fx({ opacity: 0, y: 24 }, 8), fx({ opacity: 1, y: 0, duration: 1.2 }, 0), 0.4)
+      .fromTo('.hero-ctas', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 1.1 }, 0.5)
+      .fromTo(panel, fx({ opacity: 0, x: 70, rotationY: -14 }, 10), fx({ opacity: 1, x: 0, rotationY: 0, duration: 1.6 }, 0), 0.3)
+      .fromTo('.panel li', { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.9, stagger: 0.08 }, 0.6)
+      .fromTo('.scroll-cue', { opacity: 0 }, { opacity: 1, duration: 1 }, 1.1);
   }
 
   /* ---------- заставка ---------- */
@@ -338,20 +376,29 @@
     if (intro) intro.remove();
     heroIn();
   } else {
+    /* логотип, надпись и полоса рисуются CSS-анимацией сразу при загрузке страницы (style.css),
+       скрипт дожидается конца рисунка и поднимает заставку */
     if (lenis) lenis.stop();
-    gsap.timeline({ onComplete: function () { intro.remove(); if (lenis) lenis.start(); } })
-      .to('.im-shield', { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' })
-      .to('.im-c,.im-x', { strokeDashoffset: 0, duration: 0.55, ease: 'power2.out' }, '-=.4')
-      .to('.intro-word', { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out' }, '-=.45')
-      .to('.intro-bar i', { scaleX: 1, duration: 0.65, ease: 'power2.inOut' }, '-=.5')
-      .to(intro, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.95, ease: 'expo.inOut' }, '+=.05')
-      .add(heroIn, '-=.55');
+    var lifted = false;
+    var lift = function () {
+      if (lifted) return;
+      lifted = true;
+      gsap.timeline({ onComplete: function () { intro.remove(); if (lenis) lenis.start(); } })
+        .to(intro, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.75, ease: 'expo.inOut' })
+        .add(heroIn, 0.3);
+    };
+    var bar = $('.intro-bar i', intro), barAnims = bar && bar.getAnimations ? bar.getAnimations() : [];
+    if (barAnims.length) Promise.all(barAnims.map(function (a) { return a.finished; })).then(lift, lift);
+    else setTimeout(lift, 900);
+    setTimeout(lift, 1500); /* страховка, если вкладка была в фоне */
   }
 
   /* ---------- бегущая строка, реагирующая на скорость прокрутки ---------- */
-  var track = $('#stripTrack'), set1 = track.firstElementChild, sw = set1.offsetWidth, mx = 0, dir = 1, skew = 0;
+  var track = $('#stripTrack'), set1 = track.firstElementChild, sw = set1.offsetWidth, mx = 0, dir = 1, skew = 0, stripVisible = true;
   addEventListener('resize', function () { sw = set1.offsetWidth; });
+  new IntersectionObserver(function (en) { stripVisible = en[0].isIntersecting; }).observe(track.parentElement);
   gsap.ticker.add(function (t, dt) {
+    if (!stripVisible) return; /* строка вне экрана — не пересчитываем */
     var v = lenis ? lenis.velocity : 0;
     if (v > 0.4) dir = 1; else if (v < -0.4) dir = -1;
     mx -= (0.7 + Math.min(Math.abs(v) * 0.3, 12)) * dir * (dt / 16.7);
@@ -361,6 +408,7 @@
   });
 
   /* ---------- надзаголовки, заголовки, подзаголовки ---------- */
+  defer(function () {
   $$('[data-eyebrow]').forEach(function (el) {
     ScrollTrigger.create({ trigger: el, start: 'top 90%', once: true, onEnter: function () { el.classList.add('in'); } });
   });
@@ -371,18 +419,22 @@
     h.style.visibility = 'visible';
     gsap.to(ws, { yPercent: 0, rotation: 0, duration: 1.25, ease: 'expo.out', stagger: 0.055, scrollTrigger: { trigger: h, start: 'top 88%', once: true } });
   });
+  });
+  defer(function () {
   $$('[data-fade]').forEach(function (el) {
-    gsap.fromTo(el, { opacity: 0, y: 34, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
+    gsap.fromTo(el, fx({ opacity: 0, y: 34 }, 8), fx({ opacity: 1, y: 0, duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } }, 0));
   });
   $$('[data-scrub]').forEach(function (p) {
     splitWords(p, true);
     gsap.fromTo($$('.sw', p), { opacity: 0.14 }, { opacity: 1, stagger: 0.1, ease: 'none', scrollTrigger: { trigger: p, start: 'top 86%', end: 'bottom 52%', scrub: 0.6 } });
+  });
   });
 
   /* ---------- группы карточек ---------- */
   var group = function (name) { return $$('[data-group="' + name + '"]'); };
   var onceST = function (trigger, fn, start) { ScrollTrigger.create({ trigger: trigger, start: start || 'top 85%', once: true, onEnter: fn }); };
 
+  defer(function () {
   group('tasks').forEach(function (g) {
     var items = $$(':scope>*', g);
     gsap.set(items, { transformPerspective: 1200, transformOrigin: '50% 0%' });
@@ -473,20 +525,24 @@
 
   var formEl = $('[data-form]');
   onceST(formEl, function () {
-    gsap.fromTo(formEl, { opacity: 0, y: 70, rotationY: desk ? -10 : 0, transformPerspective: 1400, filter: 'blur(12px)' },
-      { opacity: 1, y: 0, rotationY: 0, filter: 'blur(0px)', duration: 1.6, ease: 'expo.out', clearProps: 'filter' });
+    gsap.fromTo(formEl, fx({ opacity: 0, y: 70, rotationY: desk ? -10 : 0, transformPerspective: 1400 }, 12),
+      fx({ opacity: 1, y: 0, rotationY: 0, duration: 1.6, ease: 'expo.out', clearProps: 'filter' }, 0));
     gsap.fromTo($$('.field', formEl), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.06, delay: 0.35, clearProps: 'transform' });
   }, 'top 88%');
+  });
 
   /* ---------- параллакс изображений и фонов ---------- */
+  defer(function () {
   $$('img[data-parallax]').forEach(function (img) {
     gsap.fromTo(img, { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: img.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } });
   });
   $$('[data-parallax-bg]').forEach(function (bg) {
     gsap.fromTo(bg, { yPercent: -8 }, { yPercent: 8, ease: 'none', scrollTrigger: { trigger: bg.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } });
   });
+  });
 
   /* ---------- подход: цикл IPM управляется прокруткой ---------- */
+  defer(function () {
   var steps = $$('.step'), nodes = $$('.node'), cProg = $('#cycleProg'), cArc = $('#cycleArc'), cLbl = $('#cycleStep'), curStep = -1;
   var setOn = function (i) {
     if (i === curStep) return; curStep = i;
@@ -524,7 +580,7 @@
     var from = mobile ? 'inset(0% 0% 100% 0%)' : (flip ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)');
     onceST(row, function () {
       row.classList.add('in');
-      gsap.fromTo(txt, { opacity: 0, x: mobile ? 0 : (flip ? 50 : -50), y: mobile ? 24 : 0, filter: 'blur(8px)' }, { opacity: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 1.3, ease: 'expo.out', clearProps: 'filter' });
+      gsap.fromTo(txt, fx({ opacity: 0, x: mobile ? 0 : (flip ? 50 : -50), y: mobile ? 24 : 0 }, 8), fx({ opacity: 1, x: 0, y: 0, duration: 1.3, ease: 'expo.out', clearProps: 'filter' }, 0));
       gsap.fromTo(box, { clipPath: from }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'expo.inOut' });
       gsap.fromTo(pic, { scale: 1.3 }, { scale: 1, duration: 2.2, ease: 'expo.out' });
     }, 'top 72%');
@@ -538,13 +594,18 @@
     cta.addEventListener('pointermove', function (e) { var r = cta.getBoundingClientRect(); oX(e.clientX - r.left); oY(e.clientY - r.top); });
     cta.addEventListener('pointerleave', function () { oX(cta.offsetWidth * 0.5); oY(cta.offsetHeight * 0.5); });
   } else {
-    gsap.to(orb, { x: '+=' + Math.round(innerWidth * 0.15), y: '-=80', duration: 6, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    var orbTw = gsap.to(orb, { x: '+=' + Math.round(innerWidth * 0.15), y: '-=80', duration: 6, ease: 'sine.inOut', yoyo: true, repeat: -1, paused: true });
+    ScrollTrigger.create({ trigger: cta, start: 'top bottom', end: 'bottom top', onToggle: function (st) { if (st.isActive) orbTw.play(); else orbTw.pause(); } });
   }
 
   /* ---------- подвал ---------- */
   gsap.fromTo('.ft>div', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: 'footer', start: 'top 92%', once: true } });
 
-  /* пересчёт после загрузки шрифтов и изображений */
+  /* пересчёт после загрузки шрифтов и изображений (если они уже загрузились — сразу) */
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { ScrollTrigger.refresh(); });
-  addEventListener('load', function () { ScrollTrigger.refresh(); });
+  if (document.readyState === 'complete') ScrollTrigger.refresh();
+  else addEventListener('load', function () { ScrollTrigger.refresh(); });
+  });
+
+  setTimeout(runLater, 0);
 })();
