@@ -547,8 +547,9 @@ footer{border-top:1px solid var(--line);padding:clamp(56px,4.3vw,82px) 0 36px;ba
   .mbar a svg{width:18px;height:18px}
   .mbar .c1{background:rgba(255,255,255,.06)}
   .mbar .c2{background:#fff;color:#09090b}
-  .fab{right:14px;bottom:calc(90px + env(safe-area-inset-bottom));gap:10px;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .4s var(--ease),transform .5s var(--ease),translate .45s var(--ease)}
-  .mbar.show~.fab{opacity:1;transform:none;pointer-events:auto}
+  .fab{right:14px;bottom:calc(90px + env(safe-area-inset-bottom));gap:10px;transition:opacity .4s var(--ease),transform .5s var(--ease),translate .45s var(--ease)}
+  .js .fab{opacity:0;transform:translateY(16px);pointer-events:none}
+  .js .mbar.show~.fab{opacity:1;transform:none;pointer-events:auto}
   .fab a{width:46px;height:46px}
   .fab svg{width:22px;height:22px}
   .fab a::after{display:none}
