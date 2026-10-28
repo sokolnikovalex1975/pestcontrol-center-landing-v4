@@ -4,7 +4,8 @@
 
 - Предпросмотр: [sokolnikovalex1975.github.io/pestcontrol-center-landing-v4](https://sokolnikovalex1975.github.io/pestcontrol-center-landing-v4/)
 - Список правок и вопросы на подтверждение: [CHANGES.md](CHANGES.md)
-- **Опубликовано на пестконтроль-центр.рф 22.10.2026** из ветки `main` (коммит с этой записью). Копия сайта до публикации: `/backups/public_html_backup_2026-10-22_before-v4.zip` на хостинге, вне публичного каталога.
+- **Опубликовано на пестконтроль-центр.рф 28.10.2026** — ускоренная версия из ветки `main` (коммит с этой записью). Копия шести заменённых файлов: `tools/deploy/backup/before-perf_2026-10-28_ftp.zip`; исходники прежней версии — метка `before-perf-2026-10-28`.
+- Первая публикация v4 — 22.10.2026. Копия сайта до неё: `/backups/public_html_backup_2026-10-22_before-v4.zip` на хостинге, вне публичного каталога.
 - Прежняя опубликованная версия (до v4): репозиторий [pestcontrol-center-landing](https://github.com/sokolnikovalex1975/pestcontrol-center-landing)
 
 ## Ветки
@@ -27,6 +28,7 @@
 | `server/` | Файлы, которые работают только на хостинге: обработчик формы, `.htaccess`, `robots.txt`, `sitemap.xml`, счётчики |
 | `tools/build.py` | Сборка главной: встраивает сжатый `style.css` в `index.html` и сжимает `app.js` в `app.min.js`. Запускать после каждой правки `style.css` или `app.js`: `python3 tools/build.py` (нужен Node.js) |
 | `tools/legal/` | Генератор страниц документов с расстановкой неразрывных пробелов |
+| `tools/deploy/` | Скрипт выкладки по FTP (`run_all.sh`) и копия файлов до выкладки 28.10.2026 |
 
 ## Тестовая версия
 
@@ -49,6 +51,7 @@
 5. Изображения v4 загружаются под новыми именами: `ind-bakery.webp`, `ind-kitchen.webp`, `ind-hotel-room.webp`, `ind-pharma.webp`, `p-pigeon.webp`, `p-bedbug-macro.webp`, `p-moth.webp`. Сервер кэширует картинки на год, поэтому файл с прежним именем и новым содержимым посетители увидели бы не сразу. Старые файлы больше не используются, их можно удалить: `ind-elevator.webp`, `ind-food.webp`, `ind-horeca.webp`, `ind-hotel.webp`, `p-bird.webp`, `p-bedbug.webp`, `p-stored.webp`. В `server/sitemap.xml` поставьте дату выкладки в `lastmod`.
 6. Статические файлы сервер кэширует на год. После изменения `style.css`, `app.js` или `legal.css` поменяйте параметр `?v=` в ссылках на них, запустите `python3 tools/build.py`, иначе посетители получат старую версию.
 7. Перед выкладкой главной запустите `python3 tools/build.py` и загрузите `index.html` (как `index.php` со счётчиками), `app.min.js` и новые файлы из `fonts/` и `img/`. Счётчики UIS и Метрики вставляются в собранный `index.html`.
+8. Выкладка 28.10.2026 сделана скриптом `tools/deploy/run_all.sh` по FTP из «Терминала» на Mac: копия заменяемых файлов, сверка с проверенной версией, загрузка, обратная сверка по SHA-256, откат при ошибке. Из облачной среды Perplexity FTP сейчас недоступен.
 
 ## Документы
 
