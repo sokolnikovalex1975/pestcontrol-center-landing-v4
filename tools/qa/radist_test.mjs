@@ -2,6 +2,7 @@
 // Запуск из корня репозитория (нужны Node.js 18+ и puppeteer-core: npm i puppeteer-core):
 //   CHROME=/путь/к/chrome node tools/qa/radist_test.mjs             — версия из репозитория: index.html + server/counters.html
 //   CHROME=... PAGE=/путь/к/index.php node tools/qa/radist_test.mjs  — готовый index.php
+//   CHROME=... LIVE=1 LIVE_TRACKER=1 node tools/qa/radist_test.mjs   — рабочий сайт как есть, скрипт Radist с track.radist.me
 // Документ и app.min.js — из репозитория, остальные файлы — с рабочего сайта. Метрика и UIS заменены заглушками
 // (заглушка Метрики ставит cookie _ym_uid). Скрипт Radist настоящий: TRACKER=/путь/к/tracker.min.js или свежая копия
 // с track.radist.me (LIVE_TRACKER=1 — грузить прямо с track.radist.me). Отправка визита в Radist перехватывается
@@ -22,7 +23,8 @@ function buildPage() {
   const i = h.lastIndexOf('</body>');
   return h.slice(0, i) + '\n' + c.slice(a, b) + '\n' + h.slice(i);
 }
-const HTML = buildPage();
+const LIVE = !!process.env.LIVE;
+const HTML = LIVE ? '' : buildPage();
 const APP = fs.readFileSync(process.env.APP || path.join(ROOT, 'app.min.js'), 'utf8');
 const TRACKER = process.env.TRACKER ? fs.readFileSync(process.env.TRACKER, 'utf8') : await (await fetch('https://track.radist.me/tracker.min.js')).text();
 const LIVE_TRACKER = !!process.env.LIVE_TRACKER;
@@ -41,8 +43,8 @@ async function open(browser, { url = SITE, device = 'mobile', storage = true, tr
   await page.setRequestInterception(true);
   page.on('request', r => {
     const u = r.url();
-    if (u.split('?')[0] === SITE || u.split('#')[0] === SITE || u.startsWith(SITE + '?')) { if (r.resourceType() === 'document') return r.respond({ status: 200, contentType: 'text/html; charset=utf-8', body: HTML }); }
-    if (u.startsWith(SITE + 'app.min.js')) return r.respond({ status: 200, contentType: 'application/javascript; charset=utf-8', body: APP });
+    if (!LIVE && (u.split('?')[0] === SITE || u.split('#')[0] === SITE || u.startsWith(SITE + '?'))) { if (r.resourceType() === 'document') return r.respond({ status: 200, contentType: 'text/html; charset=utf-8', body: HTML }); }
+    if (!LIVE && u.startsWith(SITE + 'app.min.js')) return r.respond({ status: 200, contentType: 'application/javascript; charset=utf-8', body: APP });
     if (u.startsWith('https://mc.yandex.ru/metrika/tag.js')) return r.respond({ status: 200, contentType: 'application/javascript', body: ymuid ? 'document.cookie="_ym_uid=1761700000123456789; path=/";' : '/* stub */' });
     if (/mc\.yandex|uiscom|comagic/.test(u)) return r.abort('blockedbyclient');
     if (u === 'https://track.radist.me/tracker.min.js') {
@@ -54,7 +56,7 @@ async function open(browser, { url = SITE, device = 'mobile', storage = true, tr
       return resp();
     }
     if (u.startsWith('https://track.radist.me/track')) { log.posts.push({ t: Date.now(), body: JSON.parse(r.postData() || '{}') }); return r.respond({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{}' }); }
-    if (/radist/.test(u)) return r.abort('blockedbyclient');
+    if (/^https?:\/\/([a-z0-9-]+\.)*radist\.me\//.test(u)) return r.abort('blockedbyclient');
     return r.continue();
   });
   if (!storage) await page.evaluateOnNewDocument(() => { Storage.prototype.setItem = function () { throw new Error('storage blocked'); }; Storage.prototype.getItem = function () { return null; }; });
