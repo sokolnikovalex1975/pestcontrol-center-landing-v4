@@ -93,6 +93,34 @@
   /* клавиатурный фокус внутри шапки — показать шапку */
   hdr.addEventListener('focusin', function () { hdr.classList.remove('hide'); });
 
+  /* ---------- плавающие мессенджеры: если UIS показал свою кнопку в том же углу, поднимаем наши над ней ----------
+     Кнопку UIS (блок .comagic-c-buttons, скрытый — с классом comagic-widget--hidden) скрипт UIS добавляет после первого
+     действия посетителя и показывает по своему расписанию. Наши кнопки сдвигаются свойством translate, без сдвига вёрстки. */
+  var fab = $('.fab');
+  if (fab && window.MutationObserver) {
+    var uis = null;
+    var fitFab = function () {
+      var lift = 0;
+      if (uis && !uis.classList.contains('comagic-widget--hidden')) {
+        var r = uis.getBoundingClientRect(), f = fab.getBoundingClientRect();
+        var bottom0 = innerHeight - parseFloat(getComputedStyle(fab).bottom), top0 = bottom0 - f.height;
+        if (r.width && r.height && r.height < innerHeight * 0.6 && r.left < f.right && r.right > f.left && r.bottom > top0 - 14 && r.top < bottom0 + 14)
+          lift = Math.ceil(bottom0 - r.top + 14);
+      }
+      fab.style.translate = lift > 0 ? '0 ' + (-lift) + 'px' : '';
+    };
+    var findUis = new MutationObserver(function () {
+      var el = $('.comagic-c-buttons');
+      if (!el) return;
+      findUis.disconnect();
+      uis = el;
+      new MutationObserver(fitFab).observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
+      fitFab(); setTimeout(fitFab, 700);
+    });
+    findUis.observe(document.body, { childList: true, subtree: true });
+    addEventListener('resize', fitFab);
+  }
+
   /* активный пункт меню */
   var links = $$('.nav a');
   var so = new IntersectionObserver(function (es) {
