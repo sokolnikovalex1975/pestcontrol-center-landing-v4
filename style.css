@@ -451,6 +451,26 @@ footer{border-top:1px solid var(--line);padding:clamp(56px,4.3vw,82px) 0 36px;ba
 /* mobile action bar */
 .mbar{display:none}
 
+/* плавающие кнопки мессенджеров MAX и Telegram в правом нижнем углу; если UIS показывает там свою кнопку,
+   скрипт поднимает их над ней (свойство translate). На телефоне появляются вместе с нижней панелью и стоят над ней
+   (правила в блоке max-width:760px) */
+.fab{position:fixed;right:28px;bottom:28px;z-index:44;display:flex;flex-direction:column;gap:12px;transition:opacity .6s var(--ease) .2s,transform .6s var(--ease) .2s,translate .45s var(--ease)}
+.fab a{position:relative;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;box-shadow:0 14px 30px -12px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.16);transition:transform .35s var(--ease),box-shadow .35s}
+.fab .max{background:linear-gradient(135deg,#3fb8ff,#6a4dff 60%,#a64dff)}
+.fab .tg{background:#199bdf}
+.fab svg{width:24px;height:24px}
+.fab a::after{content:attr(aria-label);position:absolute;right:calc(100% + 12px);top:50%;padding:8px 14px;border-radius:999px;background:rgba(18,18,20,.92);border:1px solid var(--line2);color:#fff;font-size:13px;font-weight:500;line-height:1;white-space:nowrap;opacity:0;transform:translate(6px,-50%);transition:opacity .25s,transform .25s var(--ease);pointer-events:none}
+.fab a:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.fab a:focus-visible::after{opacity:1;transform:translate(0,-50%)}
+@media (hover:hover) and (pointer:fine){
+  .fab a:hover{transform:translateY(-3px);box-shadow:0 16px 32px -10px rgba(97,95,255,.75),inset 0 0 0 1px rgba(255,255,255,.22)}
+  .fab a:hover::after{opacity:1;transform:translate(0,-50%)}
+}
+/* пока идёт заставка, кнопки скрыты: появляются, когда скрипт убирает заставку */
+@media (prefers-reduced-motion:no-preference){
+  .js:not(.anim-fail):not(.no-intro) .intro~.fab{opacity:0;transform:translateY(12px);pointer-events:none}
+}
+
 /* ===== фоновые картинки блоков грузятся при подходе к блоку (класс bg-in ставит скрипт) ===== */
 .js:not(.anim-fail) .pests-bg:not(.bg-in),.js:not(.anim-fail) .cta-bg:not(.bg-in){background-image:none}
 /* бесконечные CSS-анимации блока, ушедшего с экрана, ставятся на паузу */
@@ -527,6 +547,11 @@ footer{border-top:1px solid var(--line);padding:clamp(56px,4.3vw,82px) 0 36px;ba
   .mbar a svg{width:18px;height:18px}
   .mbar .c1{background:rgba(255,255,255,.06)}
   .mbar .c2{background:#fff;color:#09090b}
+  .fab{right:14px;bottom:calc(90px + env(safe-area-inset-bottom));gap:10px;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .4s var(--ease),transform .5s var(--ease),translate .45s var(--ease)}
+  .mbar.show~.fab{opacity:1;transform:none;pointer-events:auto}
+  .fab a{width:46px;height:46px}
+  .fab svg{width:22px;height:22px}
+  .fab a::after{display:none}
   footer{padding-bottom:110px}
   .grain{opacity:.04}
 }

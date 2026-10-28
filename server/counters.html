@@ -1,19 +1,56 @@
-<!-- Вставляется в index.php на сервере. 1) Блок UIS — перед </head>, сразу после встроенных стилей (после метки style:end) -->
-<!-- UIS -->
-    <script type="text/javascript" async src="https://app.uiscom.ru/static/cs.min.js?k=ICWycQx6m3NSBe3WlCeDAdAKMTmNhMHC"></script>
-<!-- UIS -->
-
-<!-- 2) Блок Яндекс Метрики — перед </body> -->
-<!-- Yandex.Metrika counter -->
+<!-- Вставляется в index.php на сервере одним блоком перед </body> (с 28.10.2026).
+     Метрика и UIS загружаются после первого действия посетителя (касание, прокрутка, мышь, клавиатура)
+     или через 5 с после загрузки страницы: тяжёлые скрипты UIS (~280 КБ) и Вебвизор не мешают первому экрану.
+     Очередь ym() создаётся сразу, поэтому цели из app.js не теряются: они уходят, когда счётчик загрузится.
+     Визит, его длительность и отсчёт 15 с для «неотказа» Метрика ведёт с загрузки счётчика, а не с открытия страницы.
+     Отдельный блок UIS в <head> больше не нужен.
+     Ожидание подмены номера (с 29.10.2026): если номер телефона нажали до того, как UIS обработал визит,
+     набор откладывается до ответа UIS, но не дольше 0,8 с на iPhone и iPad и 1 с на остальных устройствах.
+     Затем открывается набор номера, который к этому моменту стоит в ссылке (подменный или основной).
+     Готовность UIS — команда очереди UIS waitForTrackViewAndRun: UIS выполняет её сразу после подмены номеров.
+     Таймеры ставятся из обработчика касания и не длиннее 1 с, поэтому браузер считает набор действием посетителя
+     (в Safari без этого появляется предупреждение об автоматическом вызове). Ждём только один раз за просмотр:
+     если UIS не загрузился (блокировщик, сеть), следующие касания открывают набор сразу. -->
+<!-- Yandex.Metrika counter + UIS: загружаются после первого действия посетителя (касание, прокрутка, мышь, клавиатура) или через 5 с после загрузки страницы -->
 <script type="text/javascript">
-    (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113675622', 'ym');
-
-    ym(113675622, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    (function (w, d) {
+        w.ym = w.ym || function () { (w.ym.a = w.ym.a || []).push(arguments); };
+        w.ym.l = 1 * new Date();
+        ym(113675622, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+        var done = false, ready = false, wait = null, ev = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel', 'mousemove'];
+        w.__cs = w.__cs || [];
+        w.__cs.push(['waitForTrackViewAndRun', function () { ready = true; }]);
+        function add(src) { var k = d.createElement('script'); k.async = true; k.src = src; d.head.appendChild(k); return k; }
+        function load() {
+            if (done) return; done = true;
+            ev.forEach(function (e) { w.removeEventListener(e, load, true); });
+            add('https://mc.yandex.ru/metrika/tag.js?id=113675622');
+            var p = d.createElement('link'); p.rel = 'preconnect'; p.href = 'https://tracker.comagic.ru'; d.head.appendChild(p);
+            add('https://app.uiscom.ru/static/cs.min.js?k=ICWycQx6m3NSBe3WlCeDAdAKMTmNhMHC').onerror = function () { ready = true; };
+        }
+        ev.forEach(function (e) { w.addEventListener(e, load, { capture: true, passive: true }); });
+        function later() { setTimeout(load, 5000); }
+        if (d.readyState === 'complete') later(); else w.addEventListener('load', later);
+        // Ожидание подмены номера при первом касании: набор откладывается до ответа UIS, максимум 0,8–1 с
+        d.addEventListener('click', function (e) {
+            if (ready) return;
+            var a = e.target && e.target.closest ? e.target.closest('a[href^="tel:"]') : null;
+            if (!a || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            if (wait) return;
+            load();
+            var href = a.getAttribute('href'), op = a.style.opacity, max = 'GestureEvent' in w ? 800 : 1000, t;
+            function go() {
+                for (var i = 0; i < wait.length; i++) clearTimeout(wait[i]);
+                wait = null; ready = true; a.style.opacity = op;
+                w.location.href = a.href;
+            }
+            function check(last) { return function () { if (wait && (last || ready || a.getAttribute('href') !== href)) go(); }; }
+            wait = [];
+            a.style.opacity = '.6';
+            for (t = 50; t <= max; t += 50) wait.push(setTimeout(check(t === max), t));
+        }, true);
+    })(window, document);
 </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/113675622" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
