@@ -10,8 +10,14 @@
      Готовность UIS — команда очереди UIS waitForTrackViewAndRun: UIS выполняет её сразу после подмены номеров.
      Таймеры ставятся из обработчика касания и не длиннее 1 с, поэтому браузер считает набор действием посетителя
      (в Safari без этого появляется предупреждение об автоматическом вызове). Ждём только один раз за просмотр:
-     если UIS не загрузился (блокировщик, сеть), следующие касания открывают набор сразу. -->
-<!-- Yandex.Metrika counter + UIS: загружаются после первого действия посетителя (касание, прокрутка, мышь, клавиатура) или через 5 с после загрузки страницы -->
+     если UIS не загрузился (блокировщик, сеть), следующие касания открывают набор сразу.
+     Radist (с 29.10.2026, как на агерис.рф/audit): код заявки в ссылках Telegram и MAX. Код («ro» и 10 символов)
+     создаётся сразу при открытии страницы в том же формате и в той же записи sessionStorage (radistVisit),
+     что и у скрипта Radist, и сразу подставляется в ссылки: в Telegram — в готовый текст сообщения, в MAX — параметром start.
+     Поэтому код есть в ссылке даже при нажатии до загрузки скрипта. Сам скрипт track.radist.me/tracker.min.js
+     загружается вместе с Метрикой и UIS, берёт тот же код и передаёт в Radist данные визита
+     (адрес страницы, источник перехода, метки utm, yclid, идентификатор посетителя Метрики). -->
+<!-- Yandex.Metrika counter + UIS + Radist: загружаются после первого действия посетителя (касание, прокрутка, мышь, клавиатура) или через 5 с после загрузки страницы -->
 <script type="text/javascript">
     (function (w, d) {
         w.ym = w.ym || function () { (w.ym.a = w.ym.a || []).push(arguments); };
@@ -20,6 +26,31 @@
         var done = false, ready = false, wait = null, ev = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel', 'mousemove'];
         w.__cs = w.__cs || [];
         w.__cs.push(['waitForTrackViewAndRun', function () { ready = true; }]);
+        // Radist: код заявки в ссылках Telegram и MAX — сразу, скрипт Radist загрузится вместе со счётчиками
+        var rmsg = 'Здравствуйте! Пишу с сайта пестконтроль-центр.рф. Номер заявки: {radist_tracker}';
+        w.radist_tracker = w.radist_tracker || function () { (w.radist_tracker.a = w.radist_tracker.a || []).push(arguments); };
+        w.radist_tracker.l = 1 * new Date();
+        w.radist_tracker({ message: rmsg, whatsapp_enabled: true, tgbot_enabled: true, tg_enabled: true, max_enabled: true, vk_enabled: true });
+        (function () {
+            var id = null, abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', s = 'ro', i, txt;
+            try {
+                id = sessionStorage.getItem('radistVisit');
+                if (!id || id.length !== 12) {
+                    for (i = 0; i < 10; i++) s += abc.charAt(Math.floor(Math.random() * abc.length));
+                    sessionStorage.setItem('radistVisit', s);
+                    id = sessionStorage.getItem('radistVisit');
+                }
+            } catch (e) { id = null; }
+            if (!id || id.length !== 12) return;
+            txt = encodeURIComponent(rmsg.replace(/{radist_tracker}/g, id));
+            [].forEach.call(d.querySelectorAll('a[href*="//t.me/"], a[href*="//max.ru/"]'), function (a) {
+                try {
+                    var u = new URL(a.href), n = u.pathname.split('/')[1] || '';
+                    if (u.host === 'max.ru') a.href = 'https://max.ru/' + u.pathname.substring(1) + '?start=' + id;
+                    else if (u.host === 't.me' && !/bot$/i.test(n)) a.href = 'https://t.me' + u.pathname + '?text=' + txt;
+                } catch (e) {}
+            });
+        })();
         function add(src) { var k = d.createElement('script'); k.async = true; k.src = src; d.head.appendChild(k); return k; }
         function load() {
             if (done) return; done = true;
@@ -27,6 +58,7 @@
             add('https://mc.yandex.ru/metrika/tag.js?id=113675622');
             var p = d.createElement('link'); p.rel = 'preconnect'; p.href = 'https://tracker.comagic.ru'; d.head.appendChild(p);
             add('https://app.uiscom.ru/static/cs.min.js?k=ICWycQx6m3NSBe3WlCeDAdAKMTmNhMHC').onerror = function () { ready = true; };
+            add('https://track.radist.me/tracker.min.js');
         }
         ev.forEach(function (e) { w.addEventListener(e, load, { capture: true, passive: true }); });
         function later() { setTimeout(load, 5000); }

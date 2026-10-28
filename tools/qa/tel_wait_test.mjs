@@ -64,6 +64,7 @@ async function run(name, opt) {
       return r.respond({ status: 200, contentType: 'application/javascript', body: stub(opt.uis) });
     }
     if (/uiscom|comagic/.test(u)) return r.abort('blockedbyclient');
+    if (/radist\.me/.test(u)) return r.abort('blockedbyclient'); // Radist проверяется в radist_test.mjs
     return r.continue();
   });
   await page.evaluateOnNewDocument((ios) => {
