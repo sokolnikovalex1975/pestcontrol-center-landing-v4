@@ -19,7 +19,7 @@
 
 | Путь | Что это |
 |---|---|
-| `index.html` | Главная страница. На хостинге — `index.php` со счётчиками из `server/counters.html` |
+| `index.html` | Главная страница. На хостинге — `index.php` со счётчиками из `server/counters.html` (один блок перед `</body>`, счётчики загружаются после первого действия посетителя или через 5 с) |
 | `style.css`, `app.js` | Исходники стилей и скриптов лендинга. Страница использует собранные версии: стили встроены в `index.html`, скрипт — `app.min.js` |
 | `app.min.js` | Сжатый `app.js`, собирается `tools/build.py` |
 | `privacy/`, `soglasie/` | Политика конфиденциальности и согласие на обработку персональных данных |
@@ -39,7 +39,7 @@
 Сайт размещён на виртуальном хостинге Timeweb, каталог `public_html`.
 
 1. Загрузите файлы из корня ветки `main` (кроме `README.md`, `CHANGES.md` и `tools/`). Переименуйте при загрузке:
-   - `index.html` → `index.php`, вставив два блока из `server/counters.html`;
+   - `index.html` → `index.php`, вставив перед `</body>` блок из `server/counters.html`;
    - `privacy/index.html` → `privacy/index.php`;
    - `soglasie/index.html` → `soglasie/index.php`.
 2. Из папки `server/` загрузите в корень сайта `.htaccess`, `robots.txt` и `sitemap.xml`.
