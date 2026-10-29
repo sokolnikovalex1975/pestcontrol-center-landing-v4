@@ -7,6 +7,15 @@
 @font-face{font-family:Inter;font-style:italic;font-weight:100 900;font-display:swap;src:url(fonts/inter-ru-wght-italic.woff2) format("woff2");unicode-range:U+0020-007E,U+00A0,U+00A9,U+00AB,U+00AD,U+00B0,U+00B7,U+00BB,U+00D7,U+0401,U+0410-044F,U+0451,U+2009,U+2010-2015,U+2018-201E,U+2022,U+2026,U+202F,U+2116,U+20BD,U+2192,U+2212}
 @font-face{font-family:Inter;font-style:italic;font-weight:100 900;font-display:swap;src:url(fonts/inter-cyrillic-wght-italic.woff2) format("woff2");unicode-range:U+0301,U+0400,U+0402-040F,U+0450,U+0452-045F,U+0490-0491,U+04B0-04B1}
 @font-face{font-family:Inter;font-style:italic;font-weight:100 900;font-display:swap;src:url(fonts/inter-latin-wght-italic.woff2) format("woff2");unicode-range:U+0000-001F,U+007F-009F,U+00A1-00A8,U+00AA,U+00AC,U+00AE-00AF,U+00B1-00B6,U+00B8-00BA,U+00BC-00D6,U+00D8-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-2008,U+200A-200F,U+2016-2017,U+201F-2021,U+2023-2025,U+2027-202E,U+2030-206F,U+20AC,U+2122,U+2191,U+2193,U+2215,U+FEFF,U+FFFD}
+/* Запасной шрифт на время загрузки Inter: Arial (Windows, macOS) или совместимые с ним Liberation Sans и Arimo (Linux).
+   Высота строк подогнана под Inter (ascent/descent/line-gap-override), ширина букв (size-adjust) — под тексты страницы
+   для каждого начертания (курсив 500 — точно под «в Москве и области» в заголовке). Поэтому при подмене шрифта строки не меняют высоту и почти не меняют длину, и макет не сдвигается (CLS) */
+@font-face{font-family:"Inter Fallback";font-style:normal;font-weight:100 349;src:local("Arial"),local("ArialMT"),local("Liberation Sans"),local("LiberationSans"),local("Arimo"),local("Arimo-Regular");size-adjust:104.6919%;ascent-override:92.5381%;descent-override:23.0412%;line-gap-override:0%}
+@font-face{font-family:"Inter Fallback";font-style:normal;font-weight:350 449;src:local("Arial"),local("ArialMT"),local("Liberation Sans"),local("LiberationSans"),local("Arimo"),local("Arimo-Regular");size-adjust:106.8153%;ascent-override:90.6967%;descent-override:22.5827%;line-gap-override:0%}
+@font-face{font-family:"Inter Fallback";font-style:normal;font-weight:450 549;src:local("Arial"),local("ArialMT"),local("Liberation Sans"),local("LiberationSans"),local("Arimo"),local("Arimo-Regular");size-adjust:107.1268%;ascent-override:90.4329%;descent-override:22.5171%;line-gap-override:0%}
+@font-face{font-family:"Inter Fallback";font-style:normal;font-weight:550 900;src:local("Arial Bold"),local("Arial-BoldMT"),local("Liberation Sans Bold"),local("LiberationSans-Bold"),local("Arimo Bold"),local("Arimo-Bold");size-adjust:101.0648%;ascent-override:95.8572%;descent-override:23.8677%;line-gap-override:0%}
+@font-face{font-family:"Inter Fallback";font-style:italic;font-weight:100 399;src:local("Arial Italic"),local("Arial-ItalicMT"),local("Liberation Sans Italic"),local("LiberationSans-Italic"),local("Arimo Italic"),local("Arimo-Italic");size-adjust:101.0652%;ascent-override:95.8588%;descent-override:23.8681%;line-gap-override:0%}
+@font-face{font-family:"Inter Fallback";font-style:italic;font-weight:400 900;src:local("Arial Italic"),local("Arial-ItalicMT"),local("Liberation Sans Italic"),local("LiberationSans-Italic"),local("Arimo Italic"),local("Arimo-Italic");size-adjust:104.3780%;ascent-override:92.8145%;descent-override:23.1101%;line-gap-override:0%}
 
 :root{
   --bg:#000;--bg2:#09090b;--card:rgba(24,24,27,.4);
@@ -24,7 +33,7 @@ html.lenis,html.lenis body{height:auto}
 html.lenis{scroll-behavior:auto}
 .lenis.lenis-stopped{overflow:clip}
 html{scrollbar-gutter:stable}
-body{background:var(--bg);color:var(--t1);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:clip}
+body{background:var(--bg);color:var(--t1);font-family:Inter,"Inter Fallback",system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:clip}
 img{display:block;max-width:100%;height:auto}
 a{color:inherit;text-decoration:none}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -197,6 +206,11 @@ html:not(.js) .intro,html.anim-fail .intro,html.no-intro .intro{display:none}
 .scroll-cue{position:absolute;left:var(--pad);bottom:28px;z-index:3;display:flex;align-items:center;gap:14px;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--t2);padding:10px 0}
 .scroll-cue i{position:relative;width:1px;height:44px;background:rgba(255,255,255,.15);overflow:hidden}
 .scroll-cue i::after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--acc);animation:cue 2s var(--ease-io) infinite}
+/* Высота строки первого экрана задана явно и равна высоте line-height:normal у Inter (округлённые ascent + descent;
+   Chrome перед расчётом отбрасывает у размера шрифта доли меньше 0,01 px — это повторено через round(down)),
+   поэтому она не зависит от шрифта: пока Inter грузится, запасной шрифт (любой, в том числе без знака ₽) не меняет высоту
+   шапки и панели аудита, и первый экран не сдвигается при подмене шрифта. С Inter вид не меняется */
+.intro-word span,.intro-word b,.logo-name,.logo-sub,.nav a,.phone span,.badge,.panel-h b,.panel-h small,.panel li strong,.scroll-cue span{line-height:calc(round(.96875*round(down,100em + .001px,1px)/100,1px) + round(.2412109375*round(down,100em + .001px,1px)/100,1px))}
 @keyframes cue{to{transform:translateY(375%)}}
 
 /* ===== strip ===== */
