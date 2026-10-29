@@ -153,12 +153,21 @@ html:not(.js) .intro,html.anim-fail .intro,html.no-intro .intro{display:none}
 
 /* ===== hero ===== */
 .hero{position:relative;min-height:max(100svh,760px);display:flex;align-items:center;overflow:hidden;padding:clamp(110px,10vw,180px) 0 clamp(80px,7vw,120px)}
-.hero-media{position:absolute;inset:-4%;will-change:transform}
+/* Запас фона за краями первого экрана: по вертикали — 40px, а не 4% высоты. Пока страница догружается, первый экран растёт;
+   при отступе в процентах верхний край фона съезжал вместе с ним, и браузер засчитывал сдвиг макета (CLS) */
+.hero-media{position:absolute;inset:-40px -4%;will-change:transform}
+@media (max-width:760px){.hero-media{inset:-52px -4%}} /* на телефоне первый экран выше (около 1300px): 52px — как прежние 4% */
 .hero-bg,.hero-lit{position:absolute;inset:0;background:url(img/hero.webp) center/cover}
 .hero-bg{filter:grayscale(.3) brightness(.5)}
 .hero-lit{filter:grayscale(.05) brightness(1.05) contrast(1.05);opacity:0;-webkit-mask-image:radial-gradient(circle var(--sr,300px) at var(--sx,70%) var(--sy,40%),#000 0%,rgba(0,0,0,.55) 45%,transparent 72%);mask-image:radial-gradient(circle var(--sr,300px) at var(--sx,70%) var(--sy,40%),#000 0%,rgba(0,0,0,.55) 45%,transparent 72%)}
 .hero::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(9,9,11,.92) 0%,rgba(9,9,11,.55) 50%,rgba(9,9,11,.18) 100%);pointer-events:none}
 .hero::after{content:"";position:absolute;inset:auto 0 0;height:40%;z-index:1;background:linear-gradient(0deg,#000,transparent);pointer-events:none}
+/* Затемнение низа первого экрана показываем, когда первый экран загружен целиком (после него уже есть следующий блок):
+   иначе при постепенной загрузке оно опускается вместе с растущим экраном и даёт сдвиг макета. Без поддержки :has() правило не действует */
+.hero:not(:has(~ *))::after{visibility:hidden}
+/* На компьютере и планшете текст первого экрана выровнен по центру по высоте и при постепенной загрузке подтягивается вверх.
+   Показываем его, когда первый экран загружен целиком; при заставке этого не видно. На телефоне текст прижат к верху и не сдвигается */
+@media not all and (max-width:760px){.hero:not(:has(~ *)) .wrap{visibility:hidden}}
 .hero .wrap{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1000fr) minmax(0,710fr);gap:clamp(32px,3vw,56px);align-items:end;width:100%}
 .badge{display:inline-flex;align-items:center;gap:10px;min-height:43px;padding:0 20px;border-radius:999px;background:rgba(255,255,255,.05);border:1.4px solid rgba(255,255,255,.1);backdrop-filter:blur(8px);font-size:clamp(12px,.9vw,15px);font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:#d4d4d8}
 .dot{position:relative;width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0}
