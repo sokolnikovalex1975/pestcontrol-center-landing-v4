@@ -64,10 +64,15 @@
         function later() { setTimeout(load, 5000); }
         if (d.readyState === 'complete') later(); else w.addEventListener('load', later);
         // Ожидание подмены номера при первом касании: набор откладывается до ответа UIS, максимум 0,8–1 с
+        // Если UIS уже подменил номер (например, из памяти у вернувшегося посетителя), набор идёт сразу, без ожидания
+        var tl = d.querySelectorAll('a[href^="tel:"]'), tel0 = [];
+        for (var k = 0; k < tl.length; k++) tel0.push([tl[k], tl[k].getAttribute('href')]);
+        function subst(a) { for (var i = 0; i < tel0.length; i++) if (tel0[i][0] === a) return a.getAttribute('href') !== tel0[i][1]; return false; }
         d.addEventListener('click', function (e) {
             if (ready) return;
             var a = e.target && e.target.closest ? e.target.closest('a[href^="tel:"]') : null;
             if (!a || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+            if (!wait && subst(a)) return;
             e.preventDefault();
             if (wait) return;
             load();
