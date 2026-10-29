@@ -5,7 +5,8 @@
 - Предпросмотр: [sokolnikovalex1975.github.io/pestcontrol-center-landing-v4](https://sokolnikovalex1975.github.io/pestcontrol-center-landing-v4/)
 - Список правок и вопросы на подтверждение: [CHANGES.md](CHANGES.md)
 - **Опубликовано на пестконтроль-центр.рф 28.10.2026** — ускоренная версия из ветки `main` (коммит с этой записью). Копия шести заменённых файлов: `tools/deploy/backup/before-perf_2026-10-28_ftp.zip`; исходники прежней версии — метка `before-perf-2026-10-28`.
-- **Последняя выкладка — 29.10.2026, 02:09 МСК:** плавающие кнопки MAX и Telegram, готовый текст в Telegram и код заявки Radist (`app.min.js`, `index.php`). Копия прежних файлов: `tools/deploy/backup/before-fab-radist_2026-10-29_ftp.zip`.
+- **Последняя выкладка — 29.10.2026, 14:15 МСК:** первый экран без сдвига фона при постепенной загрузке и без сдвига при подмене шрифта (заменён только `index.php`, изменились только встроенные стили; счётчики, колл-трекинг и Radist прежние). Копия прежнего файла: `tools/deploy/backup/before-cls-font_2026-10-29_ftp.zip`.
+- Предыдущая выкладка — 29.10.2026, 02:09 МСК: плавающие кнопки MAX и Telegram, готовый текст в Telegram и код заявки Radist (`app.min.js`, `index.php`). Копия прежних файлов: `tools/deploy/backup/before-fab-radist_2026-10-29_ftp.zip`.
 - Первая публикация v4 — 22.10.2026. Копия сайта до неё: `/backups/public_html_backup_2026-10-22_before-v4.zip` на хостинге, вне публичного каталога.
 - Прежняя опубликованная версия (до v4): репозиторий [pestcontrol-center-landing](https://github.com/sokolnikovalex1975/pestcontrol-center-landing)
 
